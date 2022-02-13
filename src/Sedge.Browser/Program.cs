@@ -1,0 +1,58 @@
+namespace Sedge.Browser;
+
+public class Program
+{
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern int AllocConsole();
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern int FreeConsole();
+
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        Application.SetHighDpiMode(HighDpiMode.SystemAware);
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+
+#if DEBUG
+        _ = AllocConsole();
+#endif
+
+        var services = new ServiceCollection()
+            .ConfigureServices(args);
+
+        using var sp = services.BuildServiceProvider();
+        using var scope = sp.CreateScope();
+
+        using var mainForm = scope.ServiceProvider.GetRequiredService<IMainForm>();
+
+        try
+        {
+            Application.Run(mainForm as MainForm);
+        }
+        catch (Exception ex)
+        {
+            LogErrorAndExit(ex, scope.ServiceProvider);
+        }
+
+        Exit();
+    }
+
+    private static void Exit()
+    {
+#if DEBUG
+        _ = FreeConsole();
+#endif
+        Application.Exit();
+    }
+
+    private static void LogErrorAndExit(Exception ex, IServiceProvider sp)
+    {
+        var logger = sp.GetRequiredService<ICaptainLogger<Program>>();
+
+        logger.ErrorLog($"Unhandled error!\r\n{ex}");
+        MessageBox.Show("See the log for detailed error!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        Exit();
+    }
+}
