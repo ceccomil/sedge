@@ -22,6 +22,10 @@ public class MainForm : Form, IMainForm
 
     public WebView2 Browser { get; } = new WebView2();
 
+    public FlatButton ShowNavigate { get; } = new();
+
+    public UrlNavigation Navigation { get; } = new();
+
     public MainForm(
         ICaptainLogger<MainForm> logger,
         IOptions<SedgeBrowserOptions> opts,
@@ -47,7 +51,16 @@ public class MainForm : Form, IMainForm
         ClientSize = new(600, 450);
         Text = nameof(MainForm);
 
+        Navigation.Location = new(35, 16);
+        Navigation.Navigate += (o, e) =>
+        {
+            _logger.InformationLog($"Navigating to: {e.Url}");
+            Browser.Source = e.Url;
+        };
+        Controls.Add(Navigation);
+
         this.SetupBoxButtons();
+        this.SetupShowNavigate();
         this.SetupStatusBar();
 
         ResumeLayout(false);

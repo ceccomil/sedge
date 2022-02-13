@@ -87,6 +87,7 @@ internal static class HelperExtensions
         mainForm.StatusLabel.BackColor = BorderAndStatus;
         mainForm.StatusLabel.ForeColor = GrayWhite;
         mainForm.StatusLabel.Font = new("Cascadia Code", 11.0f);
+        mainForm.StatusLabel.Click += (o, e) => Clipboard.SetText(mainForm.StatusLabel.Text);
 
         mainForm.Controls.Add(mainForm.StatusLabel);
     }
@@ -100,5 +101,30 @@ internal static class HelperExtensions
         mainForm.Browser.SourceChanged += (o, e) => mainForm.StatusLabel.Text = mainForm.Browser.Source.AbsoluteUri;
 
         mainForm.Controls.Add(mainForm.Browser);
+    }
+
+    public static void SetupShowNavigate(this IMainForm mainForm)
+    {
+        mainForm.ShowNavigate.Location = new(1, 1);
+        mainForm.ShowNavigate.Size = new(32, 32);
+        mainForm.ShowNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        mainForm.ShowNavigate.BackgroundImage = Properties.Resources.SendImg32;
+        mainForm.ShowNavigate.BackgroundImageLayout = ImageLayout.Stretch;
+
+        mainForm.ShowNavigate.FlatStyle = FlatStyle.Flat;
+        mainForm.ShowNavigate.ForeColor = GrayWhite;
+        mainForm.ShowNavigate.BackColor = DarkPanel;
+
+        mainForm.ShowNavigate.FlatAppearance.BorderSize = 0;
+        mainForm.ShowNavigate.FlatAppearance.MouseDownBackColor = BlueBar;
+        mainForm.ShowNavigate.FlatAppearance.MouseOverBackColor = LightDark;
+
+        mainForm.ShowNavigate.Click += (o, e) =>
+        {
+            mainForm.Navigation.Url = mainForm.StatusLabel.Text;
+            mainForm.Navigation.Visible = !mainForm.Navigation.Visible;
+        };
+
+        mainForm.Controls.Add(mainForm.ShowNavigate);
     }
 }

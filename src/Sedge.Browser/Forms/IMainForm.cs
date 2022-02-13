@@ -10,6 +10,8 @@ public interface IMainForm : IDisposable
     FormTimer ClockTimer { get; }
     Label StatusLabel { get; }
     WebView2 Browser { get; }
+    FlatButton ShowNavigate { get; }
+    UrlNavigation Navigation { get; }
 
     FormWindowState WindowState { get; set; }
     Control.ControlCollection Controls { get; }
