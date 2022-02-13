@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Sedge.Browser": {
+      "commandName": "Project",
+      "commandLineArgs": "\"https://portal.azure.com\" HomeAzure"
+    }
+  }
+}
