@@ -37,4 +37,7 @@ internal static class Win32Globals
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     internal static extern IntPtr GetModuleHandle(string lpModuleName);
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetActiveWindow();
 }

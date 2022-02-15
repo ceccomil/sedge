@@ -30,6 +30,8 @@ public class ProcessHooks : IProcessHooks
 
     ~ProcessHooks() => Dispose(false);
 
+    public bool IsActiveWindow(IntPtr formHandle) => GetActiveWindow() == formHandle;
+
     private void SetHooks(LowLevelProc keybProc, LowLevelProc mouseProc)
     {
         using var curProcess = Process.GetCurrentProcess();
