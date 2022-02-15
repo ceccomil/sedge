@@ -9,7 +9,12 @@ internal static class DiExtensions
 
         var (startUrl, userData, isShared) = args.GetUrlAndUserData();
 
+        var config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
         services
+            .AddSingleton<IConfiguration>(config)
             .Configure<CaptainLoggerOptions>(opts =>
             {
                 opts.TimeIsUtc = true;
@@ -42,7 +47,8 @@ internal static class DiExtensions
                     $"SettingsFor{userData}.json"));
             })
             .AddScoped<IMainForm, MainForm>()
-            .AddSingleton<IDrawBorders, DrawBorders>();
+            .AddSingleton<IDrawBorders, DrawBorders>()
+            .AddSingleton<IProcessHooks, ProcessHooks>();
 
         return services;
     }

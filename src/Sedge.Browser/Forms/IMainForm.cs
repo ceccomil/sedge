@@ -2,6 +2,8 @@
 
 public interface IMainForm : IDisposable
 {
+    ICaptainLogger Logger { get; }
+
     SedgeBrowserOptions Options { get; }
     BoxButton BoxClose { get; }
     BoxButton BoxMinMax { get; }
@@ -12,6 +14,10 @@ public interface IMainForm : IDisposable
     WebView2 Browser { get; }
     FlatButton ShowNavigate { get; }
     UrlNavigation Navigation { get; }
+
+    ICollection<string> CustomUserAgentFilters { get; }
+
+    string? DefaultUserAgent { get; set; }
 
     FormWindowState WindowState { get; set; }
     Control.ControlCollection Controls { get; }
