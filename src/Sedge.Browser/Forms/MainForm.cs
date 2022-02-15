@@ -121,6 +121,9 @@ public class MainForm : Form, IMainForm
 
         _hooks.Hooked += (o, e) =>
         {
+            if (!_hooks.IsActiveWindow(Handle))
+                return;
+
             if (e.Source != HookEventSource.Keyboard)
                 return;
 
