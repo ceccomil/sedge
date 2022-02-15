@@ -92,15 +92,113 @@ internal static class HelperExtensions
         mainForm.Controls.Add(mainForm.StatusLabel);
     }
 
-    public static void SetupBrowser(this IMainForm mainForm, string startUrl)
+    public static async Task SetupBrowser(this IMainForm mainForm, string startUrl)
     {
+        void WebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+        {
+            if (sender is not CoreWebView2 cwv2)
+                return;
+
+            mainForm
+                .Logger
+                .InformationLog($"{cwv2.Source} requires a custom useragent (e.g. Google login)");
+
+            cwv2.Settings.UserAgent = "Sedge1.0";
+
+            var secChUa = e.Request.Headers.FirstOrDefault(x => x.Key.ToLower() == "sec-ch-ua");
+            if (secChUa.Key is null || secChUa.Value is null)
+                return;
+
+            mainForm
+                .Logger
+                .InformationLog($"Original sec-ch-ua header:\r\n{secChUa.Value}");
+
+            e.Request.Headers.RemoveHeader(secChUa.Key);
+            var list = secChUa.Value.Split(",");
+
+            var newValue = "";
+            foreach (var item in list)
+            {
+                if (item.Contains("WebView2"))
+                    continue;
+
+                newValue += $"{item},";
+            }
+
+            if (newValue.Length >= 1)
+                newValue = newValue.Remove(newValue.Length - 1);
+
+            e.Request.Headers.SetHeader(secChUa.Key, newValue);
+
+            mainForm
+                .Logger
+                .InformationLog($"Amended sec-ch-ua header:\r\n{newValue}");
+        }
+
+        var env = await CoreWebView2Environment.CreateAsync(null, mainForm.Options.UserDataPath);
+        await mainForm.Browser.EnsureCoreWebView2Async(env);
+
         mainForm.Browser.Location = new(1, 33);
         mainForm.Browser.Size = new(mainForm.Width - 2, mainForm.Height - 59);
         mainForm.Browser.Source = new(startUrl);
         mainForm.Browser.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
         mainForm.Browser.SourceChanged += (o, e) => mainForm.StatusLabel.Text = mainForm.Browser.Source.AbsoluteUri;
 
+        if (string.IsNullOrEmpty(mainForm.DefaultUserAgent))
+        {
+            mainForm.DefaultUserAgent = mainForm.Browser.CoreWebView2.Settings.UserAgent;
+
+            mainForm
+                .Logger
+                .InformationLog($"Default user agent has been saved for future reference:\r\n{mainForm.DefaultUserAgent}");
+        }
+
+        foreach (var filter in mainForm.CustomUserAgentFilters)
+            mainForm
+                .Browser
+                .CoreWebView2
+                .AddWebResourceRequestedFilter(filter, CoreWebView2WebResourceContext.All);
+
+        mainForm.Browser.CoreWebView2.WebResourceRequested += WebResourceRequested;
         mainForm.Controls.Add(mainForm.Browser);
+    }
+
+    public static void SetupUrlNavigation(this IMainForm mainForm)
+    {
+        mainForm.Navigation.Location = new(35, 16);
+        mainForm.Navigation.Navigate += (o, e) =>
+        {
+            mainForm.Logger.InformationLog($"Navigating to: {e.Url}");
+            if (!string.IsNullOrEmpty(mainForm.DefaultUserAgent))
+            {
+                if (mainForm.DefaultUserAgent != mainForm.Browser.CoreWebView2.Settings.UserAgent)
+                {
+                    mainForm.Browser.CoreWebView2.Settings.UserAgent = mainForm.DefaultUserAgent;
+                    mainForm.Logger.InformationLog($"User agent rolled back to the default one: {mainForm.DefaultUserAgent}");
+                }
+            }
+
+            mainForm.Browser.Source = e.Url;
+        };
+
+        mainForm.Controls.Add(mainForm.Navigation);
+    }
+
+    public static bool IsAMatch(this IEnumerable<string> urls, string url)
+    {
+        foreach (var u in urls)
+        {
+            var pattern = u
+                .Replace(".", "\\.")
+                .Replace("*", ".*");
+
+            var regx = new Regex(pattern);
+
+            if (regx.IsMatch(url))
+                return true;
+        }
+
+        return false;
     }
 
     public static void SetupShowNavigate(this IMainForm mainForm)

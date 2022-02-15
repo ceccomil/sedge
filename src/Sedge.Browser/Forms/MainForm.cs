@@ -4,11 +4,13 @@
 public class MainForm : Form, IMainForm
 {
     private readonly IContainer _components;
-    private readonly ICaptainLogger _logger;
     private readonly IDrawBorders _drawBorders;
+    private readonly IProcessHooks _hooks;
 
     private bool _isLoaded = false;
     private bool _isResizing = false;
+
+    public ICaptainLogger Logger { get; }
 
     public SedgeBrowserOptions Options { get; }
     public BoxButton BoxClose { get; } = new(BoxButtons.Close);
@@ -26,16 +28,29 @@ public class MainForm : Form, IMainForm
 
     public UrlNavigation Navigation { get; } = new();
 
+    public ICollection<string> CustomUserAgentFilters { get; } = null!;
+
+    public string? DefaultUserAgent { get; set; }
+
     public MainForm(
         ICaptainLogger<MainForm> logger,
         IOptions<SedgeBrowserOptions> opts,
-        IDrawBorders drawBorders)
+        IDrawBorders drawBorders,
+        IConfiguration conf,
+        IProcessHooks hooks)
     {
-        _logger = logger;
+        Logger = logger;
         _components = new Container();
         _drawBorders = drawBorders;
         Options = opts.Value;
         Opacity = 0.0d;
+        
+        var filters = conf
+            .GetSection("CustomUserAgentRequired")
+            .Get<IEnumerable<string>>();
+
+        CustomUserAgentFilters = new List<string>(filters);
+        _hooks = hooks;
         Init();
     }
 
@@ -51,23 +66,19 @@ public class MainForm : Form, IMainForm
         ClientSize = new(600, 450);
         Text = nameof(MainForm);
 
-        Navigation.Location = new(35, 16);
-        Navigation.Navigate += (o, e) =>
-        {
-            _logger.InformationLog($"Navigating to: {e.Url}");
-            Browser.Source = e.Url;
-        };
-        Controls.Add(Navigation);
-
+        this.SetupUrlNavigation();
         this.SetupBoxButtons();
         this.SetupShowNavigate();
         this.SetupStatusBar();
+
+        if (!Options.IsShared)
+            ShowNavigate.Visible = false;
 
         ResumeLayout(false);
 
         Load += async (o, e) =>
         {
-            _logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
+            Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
             await Task.Delay(1000);
 
             Location = new(Options.WindowSettings.X, Options.WindowSettings.Y);
@@ -75,13 +86,11 @@ public class MainForm : Form, IMainForm
             if (Options.WindowSettings.IsMaximized)
                 this.MinMaxForm();
 
-            var env = await CoreWebView2Environment.CreateAsync(null, Options.UserDataPath);
-
-            await Browser.EnsureCoreWebView2Async(env);
-            this.SetupBrowser(Options.StartUrl.AbsoluteUri);
+            await this.SetupBrowser(Options.StartUrl.AbsoluteUri);
 
             Opacity = 1.0d;
             _isLoaded = true;
+            Invalidate();
         };
 
         FormClosing += async (o, e) => await Settings.SaveSettings(Options.WindowSettings);
@@ -108,6 +117,15 @@ public class MainForm : Form, IMainForm
                 Options.WindowSettings.X = Left;
                 Options.WindowSettings.Y = Top;
             }
+        };
+
+        _hooks.Hooked += (o, e) =>
+        {
+            if (e.Source != HookEventSource.Keyboard)
+                return;
+
+            if (e.Key == Keys.N)
+                ShowNavigate.Visible = !ShowNavigate.Visible;
         };
     }
 

@@ -36,14 +36,18 @@ public class Program
             LogErrorAndExit(ex, scope.ServiceProvider);
         }
 
-        Exit();
+        Exit(scope.ServiceProvider);
     }
 
-    private static void Exit()
+    private static void Exit(IServiceProvider sp)
     {
 #if DEBUG
         _ = FreeConsole();
 #endif
+
+        var hooks = sp.GetRequiredService<IProcessHooks>();
+        hooks.Dispose();
+
         Application.Exit();
     }
 
@@ -53,6 +57,6 @@ public class Program
 
         logger.ErrorLog($"Unhandled error!\r\n{ex}");
         MessageBox.Show("See the log for detailed error!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        Exit();
+        Exit(sp);
     }
 }
