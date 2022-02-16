@@ -2,12 +2,6 @@ namespace Sedge.Browser;
 
 public class Program
 {
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int AllocConsole();
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int FreeConsole();
-
     [STAThread]
     public static void Main(string[] args)
     {
