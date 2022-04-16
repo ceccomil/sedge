@@ -1,10 +1,18 @@
 ﻿namespace Sedge.Browser.Forms;
 
-public interface IMainForm : IDisposable
+public interface IBrowserForm : IDisposable
 {
     ICaptainLogger Logger { get; }
 
     SedgeBrowserOptions Options { get; }
+    IBrowserEnv EnvService { get; }
+    IBrowserFormCollection BrowserForms { get; }
+
+    bool IsMainForm { get; }
+
+    CoreWebView2Deferral? Deferral { get; set; }
+    CoreWebView2NewWindowRequestedEventArgs? NewWindowArgs { get; set; }
+
     BoxButton BoxClose { get; }
     BoxButton BoxMinMax { get; }
     BoxButton BoxIcon { get; }

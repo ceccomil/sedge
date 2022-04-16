@@ -1,7 +1,7 @@
 ﻿namespace Sedge.Browser.Forms;
 
 [DesignerCategory("Code")]
-public class MainForm : Form, IMainForm
+public class BrowserForm : Form, IBrowserForm
 {
     private readonly IContainer _components;
     private readonly IDrawBorders _drawBorders;
@@ -12,7 +12,15 @@ public class MainForm : Form, IMainForm
 
     public ICaptainLogger Logger { get; }
 
+    public CoreWebView2Deferral? Deferral { get; set; }
+    public CoreWebView2NewWindowRequestedEventArgs? NewWindowArgs { get; set; }
+
     public SedgeBrowserOptions Options { get; }
+    public IBrowserEnv EnvService { get; }
+    public IBrowserFormCollection BrowserForms { get; }
+
+    public bool IsMainForm => BrowserForms.MainForm == this;
+
     public BoxButton BoxClose { get; } = new(BoxButtons.Close);
     public BoxButton BoxMinMax { get; } = new(BoxButtons.Maximize);
     public BoxButton BoxIcon { get; } = new(BoxButtons.Icon);
@@ -38,29 +46,31 @@ public class MainForm : Form, IMainForm
 
     public string? DefaultUserAgent { get; set; }
 
-    public MainForm(
-        ICaptainLogger<MainForm> logger,
-        IOptions<SedgeBrowserOptions> opts,
+    public BrowserForm(
+        ICaptainLogger<BrowserForm> logger,
         IDrawBorders drawBorders,
-        IConfiguration conf,
-        IProcessHooks hooks)
+        SedgeBrowserOptions opts,
+        IBrowserEnv browserEnv,
+        IEnumerable<string> filters,
+        IProcessHooks hooks,
+        IBrowserFormCollection browserForms)
     {
         Logger = logger;
         _components = new Container();
         _drawBorders = drawBorders;
-        Options = opts.Value;
+        Options = opts;
+        EnvService = browserEnv;
+
         Opacity = 0.0d;
-        
-        var filters = conf
-            .GetSection("CustomUserAgentRequired")
-            .Get<IEnumerable<string>>();
 
         CustomUserAgentFilters = new List<string>(filters);
         _hooks = hooks;
+        BrowserForms = browserForms;
+
         Init();
     }
 
-    ~MainForm() => Dispose(false);
+    ~BrowserForm() => Dispose(false);
 
     private void Init()
     {
@@ -70,7 +80,7 @@ public class MainForm : Form, IMainForm
         Icon = Properties.Resources.SedgeIcon;
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new(600, 450);
-        Text = nameof(MainForm);
+        Text = nameof(BrowserForm);
 
         this.SetupUrlNavigation();
         this.SetupBoxButtons();
@@ -84,14 +94,15 @@ public class MainForm : Form, IMainForm
 
         Load += async (o, e) =>
         {
-            Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
+            if (IsMainForm)
+            {
+                Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
+            }
+
             await Task.Delay(1000);
 
-            Location = new(Options.WindowSettings.X, Options.WindowSettings.Y);
-            ClientSize = new(Options.WindowSettings.Width, Options.WindowSettings.Height);
-            if (Options.WindowSettings.IsMaximized)
-                this.MinMaxForm();
-
+            this.SetLocation();
+            
             await this.SetupBrowser(Options.StartUrl.AbsoluteUri);
 
             Opacity = 1.0d;
@@ -99,11 +110,17 @@ public class MainForm : Form, IMainForm
             Invalidate();
         };
 
-        FormClosing += async (o, e) => await Settings.SaveSettings(Options.WindowSettings);
+        FormClosing += async (o, e) =>
+        {
+            if (!IsMainForm)
+                return;
+
+            await Settings.SaveSettings(Options.WindowSettings);
+        };
 
         ResizeEnd += (o, e) =>
         {
-            if (!_isLoaded)
+            if (!_isLoaded || !IsMainForm)
                 return;
 
             if (WindowState == FormWindowState.Normal)
@@ -115,7 +132,7 @@ public class MainForm : Form, IMainForm
 
         LocationChanged += (o, e) =>
         {
-            if (!_isLoaded)
+            if (!_isLoaded || !IsMainForm)
                 return;
 
             if (WindowState == FormWindowState.Normal)
@@ -127,6 +144,9 @@ public class MainForm : Form, IMainForm
 
         _hooks.Hooked += (o, e) =>
         {
+            if (IsDisposed || Disposing)
+                return;
+
             if (!_hooks.IsActiveWindow(Handle))
                 return;
 
@@ -140,6 +160,21 @@ public class MainForm : Form, IMainForm
                 ShowNavigate.Visible = !ShowNavigate.Visible;
         };
     }
+
+    //private void SetLocation()
+    //{
+    //    Location = new(Options.WindowSettings.X, Options.WindowSettings.Y);
+    //    ClientSize = new(Options.WindowSettings.Width, Options.WindowSettings.Height);
+
+    //    if (!IsMainForm)
+    //    {
+    //        Location = new(Left + 30, Top + 30);
+    //        ClientSize = new(Width - 60, Height - 60);
+    //    }
+
+    //    if (Options.WindowSettings.IsMaximized)
+    //        this.MinMaxForm();
+    //}
 
     protected override void Dispose(bool disposing)
     {

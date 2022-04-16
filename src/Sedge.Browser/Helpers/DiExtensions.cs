@@ -46,9 +46,10 @@ internal static class DiExtensions
                     .ReadSettings(Path.Combine(LocalPath,
                     $"SettingsFor{userData}.json"));
             })
-            .AddScoped<IMainForm, MainForm>()
+            .AddSingleton<IBrowserFormCollection, BrowserFormCollection>()
             .AddSingleton<IDrawBorders, DrawBorders>()
-            .AddSingleton<IProcessHooks, ProcessHooks>();
+            .AddSingleton<IProcessHooks, ProcessHooks>()
+            .AddSingleton<IBrowserEnv, BrowserEnv>();
 
         return services;
     }
