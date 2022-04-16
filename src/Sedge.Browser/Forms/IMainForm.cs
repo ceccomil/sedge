@@ -8,6 +8,9 @@ public interface IMainForm : IDisposable
     BoxButton BoxClose { get; }
     BoxButton BoxMinMax { get; }
     BoxButton BoxIcon { get; }
+
+    string Title { get; set; }
+
     Label Clock { get; }
     FormTimer ClockTimer { get; }
     Label StatusLabel { get; }

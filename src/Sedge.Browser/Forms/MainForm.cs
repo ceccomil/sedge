@@ -17,6 +17,12 @@ public class MainForm : Form, IMainForm
     public BoxButton BoxMinMax { get; } = new(BoxButtons.Maximize);
     public BoxButton BoxIcon { get; } = new(BoxButtons.Icon);
 
+    public string Title
+    {
+        get => Text;
+        set => Text = value;
+    }
+
     public Label Clock { get; } = new();
     public FormTimer ClockTimer { get; } = new();
 
@@ -127,7 +133,10 @@ public class MainForm : Form, IMainForm
             if (e.Source != HookEventSource.Keyboard)
                 return;
 
-            if (e.Key == Keys.N)
+            if (Navigation.Visible)
+                return;
+
+            if (ModifierKeys.HasFlag(Keys.Control) && e.Key == Keys.N)
                 ShowNavigate.Visible = !ShowNavigate.Visible;
         };
     }

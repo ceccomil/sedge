@@ -135,7 +135,16 @@ internal static class HelperExtensions
                 .InformationLog($"Amended sec-ch-ua header:\r\n{newValue}");
         }
 
-        var env = await CoreWebView2Environment.CreateAsync(null, mainForm.Options.UserDataPath);
+        void NewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            //e.GetDeferral();
+        }
+
+        var env = await CoreWebView2Environment
+            .CreateAsync(
+                null,
+                mainForm.Options.UserDataPath);
+
         await mainForm.Browser.EnsureCoreWebView2Async(env);
 
         mainForm.Browser.Location = new(1, 33);
@@ -143,6 +152,8 @@ internal static class HelperExtensions
         mainForm.Browser.Source = new(startUrl);
         mainForm.Browser.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
         mainForm.Browser.SourceChanged += (o, e) => mainForm.StatusLabel.Text = mainForm.Browser.Source.AbsoluteUri;
+        mainForm.Browser.CoreWebView2.NavigationCompleted += (o, e) => mainForm.Title = mainForm.Browser.CoreWebView2.DocumentTitle;
+        mainForm.Browser.CoreWebView2.NewWindowRequested += NewWindowRequested;
 
         if (string.IsNullOrEmpty(mainForm.DefaultUserAgent))
         {

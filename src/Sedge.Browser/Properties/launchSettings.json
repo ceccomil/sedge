@@ -2,7 +2,7 @@
   "profiles": {
     "Sedge.Browser": {
       "commandName": "Project",
-      "commandLineArgs": "\"https://portal.azure.com\" HomeAzure"
+      "commandLineArgs": "\"https://meet.google.com\" HomeAzure"
     }
   }
 }
