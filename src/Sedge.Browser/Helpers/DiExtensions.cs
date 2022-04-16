@@ -31,8 +31,8 @@ internal static class DiExtensions
                 builder
                     .ClearProviders()
                     .AddCaptainLogger()
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Trace)
+                    .AddFilter("Microsoft", LogLevel.Trace)
                     .AddFilter(typeof(Program).Namespace, LogLevel.Information);
             })
             .Configure<SedgeBrowserOptions>(async opts =>
@@ -46,9 +46,10 @@ internal static class DiExtensions
                     .ReadSettings(Path.Combine(LocalPath,
                     $"SettingsFor{userData}.json"));
             })
-            .AddScoped<IMainForm, MainForm>()
+            .AddSingleton<IBrowserFormCollection, BrowserFormCollection>()
             .AddSingleton<IDrawBorders, DrawBorders>()
-            .AddSingleton<IProcessHooks, ProcessHooks>();
+            .AddSingleton<IProcessHooks, ProcessHooks>()
+            .AddSingleton<IBrowserEnv, BrowserEnv>();
 
         return services;
     }

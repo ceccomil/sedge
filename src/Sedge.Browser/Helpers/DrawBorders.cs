@@ -2,50 +2,6 @@
 
 public class DrawBorders : IDrawBorders
 {
-    public enum DWMWINDOWATTRIBUTE
-    {
-        DWMWA_WINDOW_CORNER_PREFERENCE = 33
-    }
-
-    public enum DWM_WINDOW_CORNER_PREFERENCE
-    {
-        DWMWCP_DEFAULT = 0,
-        DWMWCP_DONOTROUND = 1,
-        DWMWCP_ROUND = 2,
-        DWMWCP_ROUNDSMALL = 3
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct OsVersionInfo
-    {
-        public uint OsVersionInfoSize { get; }
-
-        public uint MajorVersion { get; }
-        public uint MinorVersion { get; }
-
-        public uint BuildNumber { get; }
-
-        public uint PlatformId { get; }
-
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-        private readonly string _csdVersion;
-
-        public string CSDVersion { get => _csdVersion; }
-    }
-
-    [DllImport("dwmapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    internal static extern long DwmSetWindowAttribute(IntPtr hwnd,
-        DWMWINDOWATTRIBUTE attribute,
-        ref DWM_WINDOW_CORNER_PREFERENCE pvAttribute,
-        uint cbAttribute);
-
-    [DllImport("ntdll.dll", SetLastError = true)]
-    internal static extern uint RtlGetVersion(out OsVersionInfo versionInformation);
-
-    [DllImport("winbrand.dll", CharSet = CharSet.Unicode)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern string BrandingFormatString(string format);
-
     private readonly ICaptainLogger _logger;
 
     public DrawBorders(ICaptainLogger<DrawBorders> logger)

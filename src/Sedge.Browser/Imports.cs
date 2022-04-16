@@ -1,6 +1,7 @@
 ﻿global using Sedge.Browser.Helpers;
 global using static Sedge.Browser.Helpers.Styles;
-global using static Sedge.Browser.Hooks.Win32Globals;
+global using static Sedge.Browser.Win32.Win32Globals;
+global using Sedge.Browser.Win32;
 global using Sedge.Browser.Hooks;
 global using Sedge.Browser.Controls;
 global using Sedge.Browser.Options;

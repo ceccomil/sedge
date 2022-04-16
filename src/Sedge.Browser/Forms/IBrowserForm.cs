@@ -1,13 +1,24 @@
 ﻿namespace Sedge.Browser.Forms;
 
-public interface IMainForm : IDisposable
+public interface IBrowserForm : IDisposable
 {
     ICaptainLogger Logger { get; }
 
     SedgeBrowserOptions Options { get; }
+    IBrowserEnv EnvService { get; }
+    IBrowserFormCollection BrowserForms { get; }
+
+    bool IsMainForm { get; }
+
+    CoreWebView2Deferral? Deferral { get; set; }
+    CoreWebView2NewWindowRequestedEventArgs? NewWindowArgs { get; set; }
+
     BoxButton BoxClose { get; }
     BoxButton BoxMinMax { get; }
     BoxButton BoxIcon { get; }
+
+    string Title { get; set; }
+
     Label Clock { get; }
     FormTimer ClockTimer { get; }
     Label StatusLabel { get; }
@@ -28,6 +39,9 @@ public interface IMainForm : IDisposable
     int Bottom { get; }
     int Left { get; }
     int Right { get; }
+
+    Color CurrentBorderColor { get; }
+    Color CurrentBackColor { get; }
 
     void Close();
 }

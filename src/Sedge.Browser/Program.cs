@@ -2,12 +2,6 @@ namespace Sedge.Browser;
 
 public class Program
 {
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int AllocConsole();
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int FreeConsole();
-
     [STAThread]
     public static void Main(string[] args)
     {
@@ -25,11 +19,14 @@ public class Program
         using var sp = services.BuildServiceProvider();
         using var scope = sp.CreateScope();
 
-        using var mainForm = scope.ServiceProvider.GetRequiredService<IMainForm>();
+        var formCollection = scope
+            .ServiceProvider
+            .GetRequiredService<IBrowserFormCollection>();
 
         try
         {
-            Application.Run(mainForm as MainForm);
+            Application
+                .Run(formCollection.AppendNew() as Form);
         }
         catch (Exception ex)
         {
