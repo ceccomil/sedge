@@ -40,5 +40,8 @@ public interface IBrowserForm : IDisposable
     int Left { get; }
     int Right { get; }
 
+    Color CurrentBorderColor { get; }
+    Color CurrentBackColor { get; }
+
     void Close();
 }

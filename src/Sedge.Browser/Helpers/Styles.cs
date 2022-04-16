@@ -3,8 +3,10 @@
 public static class Styles
 {
     public static Color BorderAndStatus { get; } = Color.FromArgb(134, 27, 45);
+    public static Color BorderAndStatusChildren { get; } = Color.FromArgb(72, 72, 148);
     public static Color LightDark { get; } = Color.FromArgb(64, 64, 64);
     public static Color DarkPanel { get; } = Color.FromArgb(45, 45, 48);
+    public static Color DarkPanelChildren { get; } = Color.FromArgb(64, 64, 128);
     public static Color DarkControl { get; } = Color.FromArgb(37, 37, 38);
     public static Color BlueBar { get; } = Color.FromArgb(0, 122, 204);
     public static Color GrayWhite { get; } = Color.FromArgb(189, 180, 180);

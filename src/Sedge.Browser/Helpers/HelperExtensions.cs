@@ -43,11 +43,13 @@ internal static class HelperExtensions
         bForm.BoxClose.Location = new(bForm.Right - 37, 1);
         bForm.BoxClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         bForm.BoxClose.Click += (o, e) => bForm.Close();
+        bForm.BoxClose.BackColor = bForm.CurrentBackColor;
 
         bForm.BoxMinMax.Size = new(36, 32);
         bForm.BoxMinMax.Location = new(bForm.Right - 73, 1);
         bForm.BoxMinMax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         bForm.BoxMinMax.Click += (o, e) => bForm.MinMaxForm();
+        bForm.BoxMinMax.BackColor = bForm.CurrentBackColor;
 
         bForm.BoxIcon.Size = new(36, 32);
         bForm.BoxIcon.Location = new(bForm.Right - 109, 1);
@@ -57,6 +59,7 @@ internal static class HelperExtensions
             if (bForm.WindowState == FormWindowState.Maximized || bForm.WindowState == FormWindowState.Normal)
                 bForm.WindowState = FormWindowState.Minimized;
         };
+        bForm.BoxIcon.BackColor = bForm.CurrentBackColor;
 
         bForm.Controls.Add(bForm.BoxClose);
         bForm.Controls.Add(bForm.BoxMinMax);
@@ -69,7 +72,7 @@ internal static class HelperExtensions
         bForm.Clock.Location = new Point(bForm.Right - 105, bForm.Bottom - 26);
         bForm.Clock.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         bForm.Clock.TextAlign = ContentAlignment.MiddleRight;
-        bForm.Clock.BackColor = BorderAndStatus;
+        bForm.Clock.BackColor = bForm.CurrentBorderColor;
         bForm.Clock.ForeColor = GrayWhite;
         bForm.Clock.Font = new("Cascadia Code", 11.0f);
 
@@ -84,7 +87,7 @@ internal static class HelperExtensions
         bForm.StatusLabel.Location = new Point(5, bForm.Bottom - 26); 
         bForm.StatusLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         bForm.StatusLabel.TextAlign = ContentAlignment.MiddleLeft;
-        bForm.StatusLabel.BackColor = BorderAndStatus;
+        bForm.StatusLabel.BackColor = bForm.CurrentBorderColor;
         bForm.StatusLabel.ForeColor = GrayWhite;
         bForm.StatusLabel.Font = new("Cascadia Code", 11.0f);
         bForm.StatusLabel.Click += (o, e) => Clipboard.SetText(bForm.StatusLabel.Text);
@@ -188,10 +191,7 @@ internal static class HelperExtensions
         form.ClientSize = new(bForm.Options.WindowSettings.Width, bForm.Options.WindowSettings.Height);
 
         if (!bForm.IsMainForm)
-        {
             form.Location = new(form.Left + 30, form.Top + 30);
-            form.ClientSize = new(form.Width - 60, form.Height - 60);
-        }
 
         if (bForm.Options.WindowSettings.IsMaximized)
             bForm.MinMaxForm();

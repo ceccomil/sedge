@@ -46,6 +46,9 @@ public class BrowserForm : Form, IBrowserForm
 
     public string? DefaultUserAgent { get; set; }
 
+    public Color CurrentBorderColor => IsMainForm ? BorderAndStatus : BorderAndStatusChildren;
+    public Color CurrentBackColor => IsMainForm ? DarkPanel  : DarkPanelChildren;
+
     public BrowserForm(
         ICaptainLogger<BrowserForm> logger,
         IDrawBorders drawBorders,
@@ -82,11 +85,6 @@ public class BrowserForm : Form, IBrowserForm
         ClientSize = new(600, 450);
         Text = nameof(BrowserForm);
 
-        this.SetupUrlNavigation();
-        this.SetupBoxButtons();
-        this.SetupShowNavigate();
-        this.SetupStatusBar();
-
         if (!Options.IsShared)
             ShowNavigate.Visible = false;
 
@@ -98,6 +96,11 @@ public class BrowserForm : Form, IBrowserForm
             {
                 Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
             }
+
+            this.SetupUrlNavigation();
+            this.SetupBoxButtons();
+            this.SetupShowNavigate();
+            this.SetupStatusBar();
 
             await Task.Delay(1000);
 
@@ -161,21 +164,6 @@ public class BrowserForm : Form, IBrowserForm
         };
     }
 
-    //private void SetLocation()
-    //{
-    //    Location = new(Options.WindowSettings.X, Options.WindowSettings.Y);
-    //    ClientSize = new(Options.WindowSettings.Width, Options.WindowSettings.Height);
-
-    //    if (!IsMainForm)
-    //    {
-    //        Location = new(Left + 30, Top + 30);
-    //        ClientSize = new(Width - 60, Height - 60);
-    //    }
-
-    //    if (Options.WindowSettings.IsMaximized)
-    //        this.MinMaxForm();
-    //}
-
     protected override void Dispose(bool disposing)
     {
         if (disposing && _components is not null)
@@ -188,11 +176,11 @@ public class BrowserForm : Form, IBrowserForm
     {
         if (!_isResizing)
         {
-            e.Graphics.Clear(DarkPanel);
-            e.Graphics.FillRectangle(new SolidBrush(BorderAndStatus), 0, Height - 26, Width, 26);
+            e.Graphics.Clear(CurrentBackColor);
+            e.Graphics.FillRectangle(new SolidBrush(CurrentBorderColor), 0, Height - 26, Width, 26);
 
             _drawBorders
-                .DrawRoundCornerAndBorder(this, e.Graphics, BorderAndStatus);
+                .DrawRoundCornerAndBorder(this, e.Graphics, CurrentBorderColor);
         }
     }
 
