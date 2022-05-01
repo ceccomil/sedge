@@ -156,11 +156,21 @@ public class BrowserForm : Form, IBrowserForm
             if (e.Source != HookEventSource.Keyboard)
                 return;
 
+            if (Navigation.Visible && e.Key == Keys.Escape)
+                Navigation.Visible = false;
+
             if (Navigation.Visible)
                 return;
 
             if (ModifierKeys.HasFlag(Keys.Control) && e.Key == Keys.N)
                 ShowNavigate.Visible = !ShowNavigate.Visible;
+
+            if (ModifierKeys.HasFlag(Keys.Control) && e.Key == Keys.U)
+            {
+                Navigation.Url = StatusLabel.Text;
+                ShowNavigate.Visible = true;
+                Navigation.Visible = true;
+            }
         };
     }
 

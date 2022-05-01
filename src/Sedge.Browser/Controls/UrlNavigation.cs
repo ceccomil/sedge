@@ -20,14 +20,16 @@ public class UrlNavigation : UserControl
         _components = new Container();
         InitializeComponent();
 
-        _navigate.Click += (o, e) =>
+        _navigate.Click += (o, e) => GoToUrl();
+        _url.KeyDown += (o, e) =>
         {
-            if (Uri.TryCreate(_url.Text, UriKind.Absolute, out Uri? uri))
+            if (e.KeyCode == Keys.Enter)
             {
-                Navigate?.Invoke(this, new(uri));
-                Visible = false;
+                GoToUrl();
             }
         };
+
+        VisibleChanged += (o, e) => SelectUri();
     }
 
     ~UrlNavigation() => Dispose(false);
@@ -75,6 +77,33 @@ public class UrlNavigation : UserControl
         Visible = false;
         ResumeLayout(false);
         PerformLayout();
+    }
+
+    private void SelectUri()
+    {
+        if (!Visible)
+        {
+            return;
+        }
+
+        _url.Focus();
+        _url.Select();
+        _url.SelectAll();
+    }
+
+    private void GoToUrl()
+    {
+        var txt = _url.Text;
+        if (!txt.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            txt = $"https://{txt}";
+        }
+
+        if (Uri.TryCreate(txt, UriKind.Absolute, out Uri? uri))
+        {
+            Navigate?.Invoke(this, new(uri));
+            Visible = false;
+        }
     }
 
     protected override void OnPaint(PaintEventArgs e)
