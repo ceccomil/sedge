@@ -144,11 +144,13 @@ internal static class HelperExtensions
             f.NewWindowArgs = e;
             f.Deferral = e.GetDeferral();
 
-            ((Form)f).Show();
+            f.Show();
         }
 
         if (bForm.EnvService.Environment is null)
+        {
             await bForm.EnvService.SetupEnvironment();
+        }
 
         await bForm.Browser.EnsureCoreWebView2Async(bForm.EnvService.Environment);
 
@@ -226,10 +228,25 @@ internal static class HelperExtensions
                 }
             }
 
+            if (e.NewWindow)
+            {
+                bForm
+                    .Browser
+                    .CoreWebView2
+                    .ExecuteScriptAsync($"window.open('{e.Url}');");
+
+                bForm
+                    .Logger
+                    .InformationLog(
+                        $"Js window open invoked for url {e.Url}");
+
+                return;
+            }
+
             bForm.Browser.Source = e.Url;
         };
 
-        bForm.Controls.Add(bForm.Navigation);
+        bForm.Controls.Add(bForm.Navigation as UrlNavigation);
     }
 
     public static bool IsAMatch(this IEnumerable<string> urls, string url)
@@ -268,7 +285,7 @@ internal static class HelperExtensions
         bForm.ShowNavigate.Click += (o, e) =>
         {
             bForm.Navigation.Url = bForm.StatusLabel.Text;
-            bForm.Navigation.Visible = !bForm.Navigation.Visible;
+            bForm.Navigation.ToggleShow();
         };
 
         bForm.Controls.Add(bForm.ShowNavigate);

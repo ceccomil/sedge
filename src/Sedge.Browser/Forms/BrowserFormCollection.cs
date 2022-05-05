@@ -14,6 +14,7 @@ public class BrowserFormCollection : IBrowserFormCollection
 
     private readonly ICaptainLogger _logger;
     private readonly ICaptainLogger<BrowserForm> _browserLogger;
+    private readonly ICaptainLogger<UrlNavigation> _urlNavigationLogger;
     private readonly SedgeBrowserOptions _options;
     private readonly IBrowserEnv _envService;
     private readonly IDrawBorders _drawBorders;
@@ -23,6 +24,7 @@ public class BrowserFormCollection : IBrowserFormCollection
     public BrowserFormCollection(
         ICaptainLogger<BrowserFormCollection> logger,
         ICaptainLogger<BrowserForm> browserLogger,
+        ICaptainLogger<UrlNavigation> urlNavigationLogger,
         IOptions<SedgeBrowserOptions> opts,
         IDrawBorders drawBorders,
         IConfiguration conf,
@@ -31,6 +33,7 @@ public class BrowserFormCollection : IBrowserFormCollection
     {
         _logger = logger;
         _browserLogger = browserLogger;
+        _urlNavigationLogger = urlNavigationLogger;
         _options = opts.Value;
         _drawBorders = drawBorders;
         _envService = browserEnv;
@@ -51,7 +54,8 @@ public class BrowserFormCollection : IBrowserFormCollection
                 _envService,
                 _customUserAgentFilters,
                 _hooks,
-                this);
+                this,
+                _urlNavigationLogger);
 
         if (!_forms.Any())
             MainForm = form;

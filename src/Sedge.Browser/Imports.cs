@@ -25,3 +25,5 @@ global using FormTimer = System.Windows.Forms.Timer;
 global using System.Management;
 global using System.Text.RegularExpressions;
 global using System.Diagnostics;
+global using Ctrl = System.Windows.Forms.Control;
+global using Sedge.Browser.CustomEventArgs;
