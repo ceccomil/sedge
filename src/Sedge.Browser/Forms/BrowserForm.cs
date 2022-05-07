@@ -40,7 +40,7 @@ public class BrowserForm : Form, IBrowserForm
 
     public FlatButton ShowNavigate { get; } = new();
 
-    public UrlNavigation Navigation { get; } = new();
+    public IUrlNavigation Navigation { get; }
 
     public ICollection<string> CustomUserAgentFilters { get; } = null!;
 
@@ -56,7 +56,8 @@ public class BrowserForm : Form, IBrowserForm
         IBrowserEnv browserEnv,
         IEnumerable<string> filters,
         IProcessHooks hooks,
-        IBrowserFormCollection browserForms)
+        IBrowserFormCollection browserForms,
+        ICaptainLogger<UrlNavigation> urlNavigationLogger)
     {
         Logger = logger;
         _components = new Container();
@@ -69,6 +70,10 @@ public class BrowserForm : Form, IBrowserForm
         CustomUserAgentFilters = new List<string>(filters);
         _hooks = hooks;
         BrowserForms = browserForms;
+
+        Navigation = new UrlNavigation(
+            this,
+            urlNavigationLogger);
 
         Init();
     }
@@ -156,11 +161,22 @@ public class BrowserForm : Form, IBrowserForm
             if (e.Source != HookEventSource.Keyboard)
                 return;
 
-            if (Navigation.Visible)
+            if (Navigation.IsVisible && e.Key == Keys.Escape)
+                Navigation.ToggleShow();
+
+            if (Navigation.IsVisible)
                 return;
 
             if (ModifierKeys.HasFlag(Keys.Control) && e.Key == Keys.N)
                 ShowNavigate.Visible = !ShowNavigate.Visible;
+
+            if (ModifierKeys.HasFlag(Keys.Control) && e.Key == Keys.U)
+            {
+                Navigation.HideBtnOnClose = !ShowNavigate.Visible;
+                Navigation.Url = StatusLabel.Text;
+                ShowNavigate.Visible = true;
+                Navigation.ToggleShow();
+            }
         };
     }
 

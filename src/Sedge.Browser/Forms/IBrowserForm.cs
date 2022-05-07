@@ -24,7 +24,7 @@ public interface IBrowserForm : IDisposable
     Label StatusLabel { get; }
     WebView2 Browser { get; }
     FlatButton ShowNavigate { get; }
-    UrlNavigation Navigation { get; }
+    IUrlNavigation Navigation { get; }
 
     ICollection<string> CustomUserAgentFilters { get; }
 
@@ -44,4 +44,5 @@ public interface IBrowserForm : IDisposable
     Color CurrentBackColor { get; }
 
     void Close();
+    void Show();
 }

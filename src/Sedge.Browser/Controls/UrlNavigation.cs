@@ -1,7 +1,7 @@
 ﻿namespace Sedge.Browser.Controls;
 
 [DesignerCategory("Code")]
-public class UrlNavigation : UserControl
+public class UrlNavigation : UserControl, IUrlNavigation
 {
     private readonly TextBox _url = new();
     private readonly Button _navigate = new();
@@ -9,28 +9,54 @@ public class UrlNavigation : UserControl
 
     public event EventHandler<NavEvArgs>? Navigate;
 
+    public bool IsVisible => Visible;
+
+    private readonly ICaptainLogger _logger;
+
+    private readonly IBrowserForm _browserForm;
+
     public string Url
     {
         get => _url.Text;
         set => _url.Text = value;
     }
 
-    public UrlNavigation()
+    public bool HideBtnOnClose { get; set; }
+
+    public UrlNavigation(
+        IBrowserForm browserForm,
+        ICaptainLogger<UrlNavigation> logger)
     {
         _components = new Container();
         InitializeComponent();
 
-        _navigate.Click += (o, e) =>
+        _navigate.Click += (o, e) => GoToUrl();
+        _url.KeyDown += (o, e) =>
         {
-            if (Uri.TryCreate(_url.Text, UriKind.Absolute, out Uri? uri))
+            if (e.KeyCode == Keys.Enter)
             {
-                Navigate?.Invoke(this, new(uri));
-                Visible = false;
+                GoToUrl();
             }
         };
+
+        VisibleChanged += (o, e) => SelectUri();
+
+        _browserForm = browserForm;
+        _logger = logger;
     }
 
     ~UrlNavigation() => Dispose(false);
+
+    public void ToggleShow()
+    {
+        Visible = !Visible;
+
+        if (!Visible && HideBtnOnClose)
+        {
+            _browserForm.ShowNavigate.Visible = false;
+            HideBtnOnClose = false;
+        }
+    }
 
     protected override void Dispose(bool disposing)
     {
@@ -77,18 +103,43 @@ public class UrlNavigation : UserControl
         PerformLayout();
     }
 
+    private void SelectUri()
+    {
+        if (!Visible)
+        {
+            return;
+        }
+
+        _url.Focus();
+        _url.Select();
+        _url.SelectAll();
+    }
+
+    private void GoToUrl()
+    {
+        var txt = _url.Text;
+        if (!txt.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            txt = $"https://{txt}";
+        }
+
+        if (Uri.TryCreate(txt, UriKind.Absolute, out Uri? uri))
+        {
+            var newWindow = false;
+            if (Ctrl.ModifierKeys == Keys.Control)
+            {
+                _logger.InformationLog("CTRL was pressed opening URL in a new window");
+                newWindow = true;
+            }
+
+            Navigate?.Invoke(this, new(uri, newWindow));
+            ToggleShow();
+        }
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         e.Graphics.Clear(DarkControl);
         ControlPaint.DrawBorder(e.Graphics, ClientRectangle, BorderAndStatus, ButtonBorderStyle.Solid);
-    }
-
-    public class NavEvArgs : EventArgs
-    {
-        public Uri Url { get; }
-        public NavEvArgs(Uri url)
-        {
-            Url = url;
-        }
     }
 }
