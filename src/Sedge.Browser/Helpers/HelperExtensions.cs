@@ -290,4 +290,18 @@ internal static class HelperExtensions
 
         bForm.Controls.Add(bForm.ShowNavigate);
     }
+
+    public static string GetSearchUrl(
+        this IBrowserFormCollection formCollection, 
+        string search)
+    {
+        var pattern = formCollection.SearchEngine switch
+        {
+            SearchEngines.Bing => "https://www.bing.com/search?q={0}",
+            SearchEngines.Yahoo => "https://search.yahoo.com/search?p={0}",
+            _ => "https://www.google.com/search?q={0}",
+        };
+
+        return string.Format(pattern, Uri.EscapeDataString(search));
+    }
 }

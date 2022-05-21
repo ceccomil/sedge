@@ -12,6 +12,8 @@ public class BrowserFormCollection : IBrowserFormCollection
 
     public bool IsReadOnly { get; } = false;
 
+    public SearchEngines SearchEngine { get; }
+
     private readonly ICaptainLogger _logger;
     private readonly ICaptainLogger<BrowserForm> _browserLogger;
     private readonly ICaptainLogger<UrlNavigation> _urlNavigationLogger;
@@ -43,6 +45,28 @@ public class BrowserFormCollection : IBrowserFormCollection
             .Get<IEnumerable<string>>();
 
         _hooks = hooks;
+
+        var se = conf["SearchEngine"];
+
+        if (string.IsNullOrWhiteSpace(se))
+        {
+            return;
+        }
+
+        try
+        {
+            SearchEngine = (SearchEngines)Convert.ToInt32(se);
+        }
+        catch(Exception ex)
+        {
+            _logger
+                .ErrorLog(
+                    $"SearchEngine value from appsettings `{se}` is not valid!",
+                    ex);
+        }
+
+        _logger
+            .InformationLog($"Selected search engine {SearchEngine}");
     }
 
     public IBrowserForm AppendNew()
