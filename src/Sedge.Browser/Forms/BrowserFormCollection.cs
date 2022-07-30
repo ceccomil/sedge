@@ -12,6 +12,11 @@ public class BrowserFormCollection : IBrowserFormCollection
 
     public bool IsReadOnly { get; } = false;
 
+    public SearchEngines SearchEngine { get; }
+
+    public FileInfo? ExternalBrowser { get; }
+
+    private readonly IConfiguration _conf;
     private readonly ICaptainLogger _logger;
     private readonly ICaptainLogger<BrowserForm> _browserLogger;
     private readonly ICaptainLogger<UrlNavigation> _urlNavigationLogger;
@@ -31,6 +36,7 @@ public class BrowserFormCollection : IBrowserFormCollection
         IProcessHooks hooks,
         IBrowserEnv browserEnv)
     {
+        _conf = conf;
         _logger = logger;
         _browserLogger = browserLogger;
         _urlNavigationLogger = urlNavigationLogger;
@@ -43,6 +49,46 @@ public class BrowserFormCollection : IBrowserFormCollection
             .Get<IEnumerable<string>>();
 
         _hooks = hooks;
+
+        var se = conf["SearchEngine"];
+
+        if (string.IsNullOrWhiteSpace(se))
+        {
+            return;
+        }
+
+        try
+        {
+            SearchEngine = (SearchEngines)Convert.ToInt32(se);
+        }
+        catch(Exception ex)
+        {
+            _logger
+                .ErrorLog(
+                    $"SearchEngine value from appsettings `{se}` is not valid!",
+                    ex);
+        }
+
+        _logger
+            .InformationLog($"Selected search engine {SearchEngine}");
+
+
+        ExternalBrowser = GetExternalBrowser();
+}
+
+    private FileInfo? GetExternalBrowser()
+    {
+        var path = _conf["ExternalBrowser"];
+        if (File.Exists(path))
+        {
+            _logger
+                .InformationLog(
+                    $"External browser path: {path}");
+
+            return new(path);
+        }
+
+        return null;
     }
 
     public IBrowserForm AppendNew()

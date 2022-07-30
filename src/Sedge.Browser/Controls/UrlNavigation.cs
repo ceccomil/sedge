@@ -118,6 +118,16 @@ public class UrlNavigation : UserControl, IUrlNavigation
     private void GoToUrl()
     {
         var txt = _url.Text;
+        var domainPattern = @"^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})$";
+
+        var rgx = new Regex(domainPattern);
+        if (!rgx.IsMatch(txt) && !txt.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            txt = _browserForm
+                .BrowserForms
+                .GetSearchUrl(txt);
+        }
+        
         if (!txt.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
             txt = $"https://{txt}";

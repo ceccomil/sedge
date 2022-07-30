@@ -163,6 +163,11 @@ internal static class HelperExtensions
         bForm.Browser.CoreWebView2.NewWindowRequested += NewWindowRequested;
         bForm.Browser.CoreWebView2.WebResourceRequested += WebResourceRequested;
 
+        if (bForm.BrowserForms.ExternalBrowser is not null)
+        {
+            bForm.SetupExternalBrowser();
+        }
+
         if (string.IsNullOrEmpty(bForm.DefaultUserAgent))
         {
             bForm.DefaultUserAgent = bForm.Browser.CoreWebView2.Settings.UserAgent;
@@ -181,6 +186,63 @@ internal static class HelperExtensions
         OnStart(bForm);
 
         bForm.Controls.Add(bForm.Browser);
+    }
+
+    private static void SetupExternalBrowser(
+        this IBrowserForm bForm)
+    {
+        var openExternal = bForm
+            .Browser
+            .CoreWebView2
+            .Environment
+            .CreateContextMenuItem(
+                "Open with default browser",
+                null,
+                CoreWebView2ContextMenuItemKind.Command);
+
+        CoreWebView2ContextMenuRequestedEventArgs? eArgs = null;
+
+        void CustomItemSelected(object? sender, object e1)
+        {
+            if (eArgs is null)
+            {
+                return;
+            }
+
+            var fInfo = bForm
+                        .BrowserForms
+                        .ExternalBrowser
+                        ?? throw new NullReferenceException();
+
+            fInfo
+                .RunUrlOnExternalBrowser(
+                    eArgs.ContextMenuTarget.LinkUri.ToString());
+
+            openExternal
+                .CustomItemSelected -= CustomItemSelected;
+        }
+
+        bForm
+            .Browser
+            .CoreWebView2
+            .ContextMenuRequested += ContextMenuRequested;
+
+        void ContextMenuRequested(
+            object? sender,
+            CoreWebView2ContextMenuRequestedEventArgs e)
+        {
+            eArgs = e;
+
+            if (!eArgs.ContextMenuTarget.HasLinkUri)
+            {
+                return;
+            }
+
+            eArgs.MenuItems.Add(openExternal);
+
+            openExternal
+                .CustomItemSelected += CustomItemSelected;
+        }
     }
 
     public static void SetLocation(this IBrowserForm bForm)
@@ -289,5 +351,29 @@ internal static class HelperExtensions
         };
 
         bForm.Controls.Add(bForm.ShowNavigate);
+    }
+
+    public static string GetSearchUrl(
+        this IBrowserFormCollection formCollection, 
+        string search)
+    {
+        var pattern = formCollection.SearchEngine switch
+        {
+            SearchEngines.Bing => "https://www.bing.com/search?q={0}",
+            SearchEngines.Yahoo => "https://search.yahoo.com/search?p={0}",
+            _ => "https://www.google.com/search?q={0}",
+        };
+
+        return string.Format(pattern, Uri.EscapeDataString(search));
+    }
+
+    public static void RunUrlOnExternalBrowser(
+        this FileInfo browser,
+        string url)
+    {
+        using var proc = new Process();
+        proc.StartInfo = new(browser.FullName, url);
+
+        _ = proc.Start();
     }
 }
