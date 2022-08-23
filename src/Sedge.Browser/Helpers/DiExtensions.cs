@@ -49,7 +49,8 @@ internal static class DiExtensions
             .AddSingleton<IBrowserFormCollection, BrowserFormCollection>()
             .AddSingleton<IDrawBorders, DrawBorders>()
             .AddSingleton<IProcessHooks, ProcessHooks>()
-            .AddSingleton<IBrowserEnv, BrowserEnv>();
+            .AddSingleton<IBrowserEnv, BrowserEnv>()
+            .AddSingleton<IYesNoDialogForm, YesNoDialogForm>();
 
         return services;
     }
