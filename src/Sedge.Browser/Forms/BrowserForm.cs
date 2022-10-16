@@ -121,7 +121,9 @@ public class BrowserForm : Form, IBrowserForm
         FormClosing += async (o, e) =>
         {
             if (!IsMainForm)
+            {
                 return;
+            }
 
             await Settings.SaveSettings(Options.WindowSettings);
         };

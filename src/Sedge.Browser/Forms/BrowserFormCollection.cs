@@ -8,6 +8,8 @@ public class BrowserFormCollection : IBrowserFormCollection
 
     public IBrowserForm MainForm { get; private set; } = null!;
 
+    public IYesNoDialogForm YesNoDialogForm { get; }
+
     public int Count => _forms.Count;
 
     public bool IsReadOnly { get; } = false;
@@ -34,7 +36,8 @@ public class BrowserFormCollection : IBrowserFormCollection
         IDrawBorders drawBorders,
         IConfiguration conf,
         IProcessHooks hooks,
-        IBrowserEnv browserEnv)
+        IBrowserEnv browserEnv,
+        IYesNoDialogForm yesNoDialogForm)
     {
         _conf = conf;
         _logger = logger;
@@ -43,6 +46,8 @@ public class BrowserFormCollection : IBrowserFormCollection
         _options = opts.Value;
         _drawBorders = drawBorders;
         _envService = browserEnv;
+
+        YesNoDialogForm = yesNoDialogForm;
 
         _customUserAgentFilters = conf
             .GetSection("CustomUserAgentRequired")
@@ -61,7 +66,7 @@ public class BrowserFormCollection : IBrowserFormCollection
         {
             SearchEngine = (SearchEngines)Convert.ToInt32(se);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger
                 .ErrorLog(
@@ -74,7 +79,7 @@ public class BrowserFormCollection : IBrowserFormCollection
 
 
         ExternalBrowser = GetExternalBrowser();
-}
+    }
 
     private FileInfo? GetExternalBrowser()
     {
@@ -136,7 +141,27 @@ public class BrowserFormCollection : IBrowserFormCollection
     private void FormClosing(BrowserForm bForm, FormClosingEventArgs e)
     {
         if (bForm == MainForm && _forms.Count != 1)
-            e.Cancel = true;
+        {
+            var result = YesNoDialogForm
+                .ShowDialog(
+                    bForm,
+                    "This is the main form\r\n" +
+                    "Closing it will close all others opened\r\n" +
+                    "Do you want to proceed?");
+
+            if (result != DialogResult.Yes)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            foreach (var f in _forms.Where(x => x != MainForm).ToList())
+            {
+                f.Close();
+            }
+
+            bForm.Close();
+        }
     }
 
     public void Clear() => _forms.Clear();
