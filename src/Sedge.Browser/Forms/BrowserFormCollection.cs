@@ -51,7 +51,8 @@ public class BrowserFormCollection : IBrowserFormCollection
 
         _customUserAgentFilters = conf
             .GetSection("CustomUserAgentRequired")
-            .Get<IEnumerable<string>>();
+            .Get<IEnumerable<string>>()
+            ?? Array.Empty<string>();
 
         _hooks = hooks;
 
