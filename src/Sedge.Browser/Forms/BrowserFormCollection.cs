@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Sedge.Browser.Forms;
+﻿namespace Sedge.Browser.Forms;
 
 public class BrowserFormCollection : IBrowserFormCollection
 {
@@ -17,6 +15,8 @@ public class BrowserFormCollection : IBrowserFormCollection
     public SearchEngines SearchEngine { get; }
 
     public FileInfo? ExternalBrowser { get; }
+
+    public ICollection<string> StartPages { get; }
 
     private readonly IConfiguration _conf;
     private readonly ICaptainLogger _logger;
@@ -53,6 +53,11 @@ public class BrowserFormCollection : IBrowserFormCollection
             .GetSection("CustomUserAgentRequired")
             .Get<IEnumerable<string>>()
             ?? Array.Empty<string>();
+
+        StartPages = conf
+            .GetSection("StartingPages")
+            .Get<ICollection<string>>()
+            ?? new List<string>();
 
         _hooks = hooks;
 
@@ -110,7 +115,9 @@ public class BrowserFormCollection : IBrowserFormCollection
                 _urlNavigationLogger);
 
         if (!_forms.Any())
+        {
             MainForm = form;
+        }
 
         Add(form);
 

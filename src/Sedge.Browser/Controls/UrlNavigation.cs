@@ -1,4 +1,6 @@
-﻿namespace Sedge.Browser.Controls;
+﻿using System;
+
+namespace Sedge.Browser.Controls;
 
 [DesignerCategory("Code")]
 public class UrlNavigation : UserControl, IUrlNavigation
@@ -145,6 +147,15 @@ public class UrlNavigation : UserControl, IUrlNavigation
             Navigate?.Invoke(this, new(uri, newWindow));
             ToggleShow();
         }
+    }
+
+    public void GoToUrl(
+    string url,
+    bool newWindow)
+    {
+        Url = url;
+        var uri = new Uri(url);
+        Navigate?.Invoke(this, new(uri, newWindow));
     }
 
     protected override void OnPaint(PaintEventArgs e)

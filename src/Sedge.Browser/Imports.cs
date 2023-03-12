@@ -27,3 +27,4 @@ global using System.Text.RegularExpressions;
 global using System.Diagnostics;
 global using Ctrl = System.Windows.Forms.Control;
 global using Sedge.Browser.CustomEventArgs;
+global using System.Collections;

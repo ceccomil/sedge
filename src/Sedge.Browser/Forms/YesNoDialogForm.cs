@@ -13,7 +13,6 @@ public interface IYesNoDialogForm
 [DesignerCategory("Code")]
 public class YesNoDialogForm : Form, IYesNoDialogForm
 {
-    private readonly ICaptainLogger _logger;
     private readonly Color _borderColor = BorderAndStatusChildren;
     private readonly Color _backColor = DarkPanelChildren;
     private readonly IDrawBorders _drawBorders;
@@ -23,10 +22,8 @@ public class YesNoDialogForm : Form, IYesNoDialogForm
     private readonly Button _no = new();
 
     public YesNoDialogForm(
-        ICaptainLogger<YesNoDialogForm> logger,
         IDrawBorders drawBorders)
     {
-        _logger = logger;
         _drawBorders = drawBorders;
         Init();
     }

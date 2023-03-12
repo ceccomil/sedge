@@ -8,4 +8,8 @@ public interface IUrlNavigation
     bool IsVisible { get; }
     bool HideBtnOnClose { get; set; }
     void ToggleShow();
+
+    void GoToUrl(
+        string url,
+        bool newWindow);
 }

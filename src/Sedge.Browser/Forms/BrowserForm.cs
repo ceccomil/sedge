@@ -1,4 +1,6 @@
-﻿namespace Sedge.Browser.Forms;
+﻿using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
+namespace Sedge.Browser.Forms;
 
 [DesignerCategory("Code")]
 public class BrowserForm : Form, IBrowserForm
@@ -116,6 +118,16 @@ public class BrowserForm : Form, IBrowserForm
             Opacity = 1.0d;
             _isLoaded = true;
             Invalidate();
+
+            if (IsMainForm)
+            {
+                foreach (var page in BrowserForms.StartPages)
+                {
+                    Navigation.GoToUrl(
+                        page,
+                        newWindow: true);
+                }
+            }
         };
 
         FormClosing += async (o, e) =>

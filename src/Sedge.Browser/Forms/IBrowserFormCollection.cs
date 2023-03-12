@@ -8,4 +8,6 @@ public interface IBrowserFormCollection : ICollection<BrowserForm>
     IBrowserForm AppendNew();
 
     IYesNoDialogForm YesNoDialogForm { get; }
+
+    ICollection<string> StartPages { get; }
 }
