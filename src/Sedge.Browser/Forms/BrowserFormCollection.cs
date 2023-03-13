@@ -16,8 +16,6 @@ public class BrowserFormCollection : IBrowserFormCollection
 
     public FileInfo? ExternalBrowser { get; }
 
-    public ICollection<string> StartPages { get; }
-
     private readonly IConfiguration _conf;
     private readonly ICaptainLogger _logger;
     private readonly ICaptainLogger<BrowserForm> _browserLogger;
@@ -53,11 +51,6 @@ public class BrowserFormCollection : IBrowserFormCollection
             .GetSection("CustomUserAgentRequired")
             .Get<IEnumerable<string>>()
             ?? Array.Empty<string>();
-
-        StartPages = conf
-            .GetSection("StartingPages")
-            .Get<ICollection<string>>()
-            ?? new List<string>();
 
         _hooks = hooks;
 

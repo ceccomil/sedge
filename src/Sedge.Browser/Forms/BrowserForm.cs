@@ -93,7 +93,9 @@ public class BrowserForm : Form, IBrowserForm
         Text = nameof(BrowserForm);
 
         if (!Options.IsShared)
+        {
             ShowNavigate.Visible = false;
+        }
 
         ResumeLayout(false);
 
@@ -101,7 +103,8 @@ public class BrowserForm : Form, IBrowserForm
         {
             if (IsMainForm)
             {
-                Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
+                Logger.InformationLog(
+                    $"Application is started, userData: {Options.UserData}");
             }
 
             this.SetupUrlNavigation();
@@ -113,7 +116,8 @@ public class BrowserForm : Form, IBrowserForm
 
             this.SetLocation();
             
-            await this.SetupBrowser(Options.StartUrl.AbsoluteUri);
+            await this.SetupBrowser(
+                Options.StartPages[0]);
 
             Opacity = 1.0d;
             _isLoaded = true;
@@ -121,10 +125,10 @@ public class BrowserForm : Form, IBrowserForm
 
             if (IsMainForm)
             {
-                foreach (var page in BrowserForms.StartPages)
+                for (var i = 1; i < Options.StartPages.Length; i++)
                 {
                     Navigation.GoToUrl(
-                        page,
+                        Options.StartPages[i],
                         newWindow: true);
                 }
             }

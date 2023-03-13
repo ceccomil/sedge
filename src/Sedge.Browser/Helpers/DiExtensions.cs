@@ -4,10 +4,11 @@ internal static class DiExtensions
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection services, string[]? args = default)
     {
-        if (args is null)
-            args = Array.Empty<string>();
+        args ??= Array
+            .Empty<string>();
 
-        var (startUrl, userData, isShared) = args.GetUrlAndUserData();
+        var (startPages, userData, isShared) = args
+            .GetUrlsAndUserData();
 
         var config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -37,7 +38,7 @@ internal static class DiExtensions
             })
             .Configure<SedgeBrowserOptions>(async opts =>
             {
-                opts.StartUrl = startUrl;
+                opts.StartPages = startPages;
                 opts.UserData = userData;
                 opts.IsShared = isShared;
 

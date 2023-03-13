@@ -2,23 +2,53 @@
 
 internal static class HelperExtensions
 {
-    public static (Uri, string, bool) GetUrlAndUserData(this string[] args)
-    {
-        if (args.Length != 0 && args.Length != 2)
-            throw new ApplicationException("Either zero or two arguments (`start URL`, `userdata`) are required");
+    //public static (Uri, string, bool) GetUrlAndUserData(this string[] args)
+    //{
+    //    if (args.Length != 0 && args.Length != 2)
+    //    {
+    //        throw new ApplicationException(
+    //            "Either zero or two arguments " +
+    //            "(`start URL`, `userdata`) are required");
+    //    }
 
-        var startUrl = "https://www.google.com";
+    //    var startUrl = "https://www.google.com";
+    //    var userData = "DefaultShared";
+    //    var isShared = true;
+
+    //    if (args.Length == 2)
+    //    {
+    //        startUrl = args[0];
+    //        userData = args[1];
+    //        isShared = false;
+    //    }
+
+    //    return (new Uri(startUrl), userData, isShared);
+    //}
+
+    public static (string[], string, bool) GetUrlsAndUserData(
+        this string[] args)
+    {
         var userData = "DefaultShared";
         var isShared = true;
-
-        if (args.Length == 2)
+        var startPages = new string[1]
         {
-            startUrl = args[0];
-            userData = args[1];
+            "https://www.google.com"
+        };
+
+        if (args.Length >= 1)
+        {
+            userData = args[0];          
             isShared = false;
+
+            startPages = args
+                .Take(new Range(1, args.Length))
+                .ToArray();
         }
 
-        return (new Uri(startUrl), userData, isShared);
+        return (
+            startPages, 
+            userData, 
+            isShared);
     }
 
     public static void MinMaxForm(this IBrowserForm bForm)
