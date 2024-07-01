@@ -19,14 +19,23 @@ public class Program
         using var sp = services.BuildServiceProvider();
         using var scope = sp.CreateScope();
 
+        var bList = scope
+            .ServiceProvider
+            .GetRequiredService<IBrowsersList>();
+
+        bList.Init(args);
+
         var formCollection = scope
             .ServiceProvider
             .GetRequiredService<IBrowserFormCollection>();
 
         try
         {
-            Application
-                .Run(formCollection.AppendNew() as Form);
+            var form = formCollection.AppendNew() as Form
+                ?? throw new InvalidOperationException(
+                    "Failed to create a new form!");
+
+            Application.Run(form);
         }
         catch (Exception ex)
         {

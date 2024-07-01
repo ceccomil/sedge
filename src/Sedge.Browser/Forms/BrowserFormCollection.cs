@@ -27,6 +27,7 @@ public class BrowserFormCollection : IBrowserFormCollection
     private readonly IDrawBorders _drawBorders;
     private readonly IProcessHooks _hooks;
     private readonly IEnumerable<string> _customUserAgentFilters;
+    private readonly IBrowsersList _browsers;
 
     public BrowserFormCollection(
         ICaptainLogger<BrowserFormCollection> logger,
@@ -37,7 +38,8 @@ public class BrowserFormCollection : IBrowserFormCollection
         IConfiguration conf,
         IProcessHooks hooks,
         IBrowserEnv browserEnv,
-        IYesNoDialogForm yesNoDialogForm)
+        IYesNoDialogForm yesNoDialogForm,
+        IBrowsersList browsers)
     {
         _conf = conf;
         _logger = logger;
@@ -46,6 +48,7 @@ public class BrowserFormCollection : IBrowserFormCollection
         _options = opts.Value;
         _drawBorders = drawBorders;
         _envService = browserEnv;
+        _browsers = browsers;
 
         YesNoDialogForm = yesNoDialogForm;
 
@@ -107,7 +110,8 @@ public class BrowserFormCollection : IBrowserFormCollection
                 _customUserAgentFilters,
                 _hooks,
                 this,
-                _urlNavigationLogger);
+                _urlNavigationLogger,
+                _browsers);
 
         if (!_forms.Any())
             MainForm = form;

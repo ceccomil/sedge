@@ -127,7 +127,7 @@ public class UrlNavigation : UserControl, IUrlNavigation
                 .BrowserForms
                 .GetSearchUrl(txt);
         }
-        
+
         if (!txt.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
             txt = $"https://{txt}";
@@ -145,6 +145,11 @@ public class UrlNavigation : UserControl, IUrlNavigation
             Navigate?.Invoke(this, new(uri, newWindow));
             ToggleShow();
         }
+    }
+
+    public void GoToUrlNewWindow(string url)
+    {
+        Navigate?.Invoke(this, new(new Uri(url), true));
     }
 
     protected override void OnPaint(PaintEventArgs e)

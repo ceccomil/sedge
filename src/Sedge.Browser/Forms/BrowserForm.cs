@@ -6,6 +6,7 @@ public class BrowserForm : Form, IBrowserForm
     private readonly IContainer _components;
     private readonly IDrawBorders _drawBorders;
     private readonly IProcessHooks _hooks;
+    private readonly IBrowsersList _urls;
 
     private bool _isLoaded = false;
     private bool _isResizing = false;
@@ -47,7 +48,7 @@ public class BrowserForm : Form, IBrowserForm
     public string? DefaultUserAgent { get; set; }
 
     public Color CurrentBorderColor => IsMainForm ? BorderAndStatus : BorderAndStatusChildren;
-    public Color CurrentBackColor => IsMainForm ? DarkPanel  : DarkPanelChildren;
+    public Color CurrentBackColor => IsMainForm ? DarkPanel : DarkPanelChildren;
 
     public BrowserForm(
         ICaptainLogger<BrowserForm> logger,
@@ -57,7 +58,8 @@ public class BrowserForm : Form, IBrowserForm
         IEnumerable<string> filters,
         IProcessHooks hooks,
         IBrowserFormCollection browserForms,
-        ICaptainLogger<UrlNavigation> urlNavigationLogger)
+        ICaptainLogger<UrlNavigation> urlNavigationLogger,
+        IBrowsersList urls)
     {
         Logger = logger;
         _components = new Container();
@@ -74,6 +76,8 @@ public class BrowserForm : Form, IBrowserForm
         Navigation = new UrlNavigation(
             this,
             urlNavigationLogger);
+
+        _urls = urls;
 
         Init();
     }
@@ -97,11 +101,6 @@ public class BrowserForm : Form, IBrowserForm
 
         Load += async (o, e) =>
         {
-            if (IsMainForm)
-            {
-                Logger.InformationLog($"Application is started: {Options.StartUrl} - userData: {Options.UserData}");
-            }
-
             this.SetupUrlNavigation();
             this.SetupBoxButtons();
             this.SetupShowNavigate();
@@ -110,8 +109,21 @@ public class BrowserForm : Form, IBrowserForm
             await Task.Delay(1000);
 
             this.SetLocation();
-            
+
             await this.SetupBrowser(Options.StartUrl.AbsoluteUri);
+
+            if (IsMainForm)
+            {
+                Logger.InformationLog(
+                    $"Application is started: {Options.StartUrl} " +
+                    $"- userData: {Options.UserData}");
+
+                foreach (var url in _urls.Urls)
+                {
+                    Logger.InformationLog($"Url: {url}");
+                    Navigation.GoToUrlNewWindow(url);
+                }
+            }
 
             Opacity = 1.0d;
             _isLoaded = true;

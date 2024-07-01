@@ -4,18 +4,19 @@ internal static class HelperExtensions
 {
     public static (Uri, string, bool) GetUrlAndUserData(this string[] args)
     {
-        if (args.Length != 0 && args.Length != 2)
-            throw new ApplicationException("Either zero or two arguments (`start URL`, `userdata`) are required");
-
         var startUrl = "https://www.google.com";
         var userData = "DefaultShared";
         var isShared = true;
 
-        if (args.Length == 2)
+        if (args.Length >= 1)
         {
-            startUrl = args[0];
-            userData = args[1];
+            userData = args.Last();
             isShared = false;
+        }
+
+        if (args.Length >= 2)
+        {
+            startUrl = args.First();
         }
 
         return (new Uri(startUrl), userData, isShared);
@@ -84,7 +85,7 @@ internal static class HelperExtensions
 
         bForm.StatusLabel.Size = new(bForm.Clock.Left - 10, 26);
         bForm.StatusLabel.AutoSize = false;
-        bForm.StatusLabel.Location = new Point(5, bForm.Bottom - 26); 
+        bForm.StatusLabel.Location = new Point(5, bForm.Bottom - 26);
         bForm.StatusLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         bForm.StatusLabel.TextAlign = ContentAlignment.MiddleLeft;
         bForm.StatusLabel.BackColor = bForm.CurrentBorderColor;
@@ -354,7 +355,7 @@ internal static class HelperExtensions
     }
 
     public static string GetSearchUrl(
-        this IBrowserFormCollection formCollection, 
+        this IBrowserFormCollection formCollection,
         string search)
     {
         var pattern = formCollection.SearchEngine switch
