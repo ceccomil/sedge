@@ -4,8 +4,7 @@ internal static class DiExtensions
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection services, string[]? args = default)
     {
-        if (args is null)
-            args = Array.Empty<string>();
+        args ??= [];
 
         var (startUrl, userData, isShared) = args.GetUrlAndUserData();
 
@@ -50,7 +49,8 @@ internal static class DiExtensions
             .AddSingleton<IDrawBorders, DrawBorders>()
             .AddSingleton<IProcessHooks, ProcessHooks>()
             .AddSingleton<IBrowserEnv, BrowserEnv>()
-            .AddSingleton<IYesNoDialogForm, YesNoDialogForm>();
+            .AddSingleton<IYesNoDialogForm, YesNoDialogForm>()
+            .AddSingleton<IBrowsersList, BrowsersList>();
 
         return services;
     }
