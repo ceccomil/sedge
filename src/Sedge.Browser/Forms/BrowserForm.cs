@@ -13,7 +13,10 @@ public class BrowserForm : Form, IBrowserForm
 
     public ICaptainLogger Logger { get; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public CoreWebView2Deferral? Deferral { get; set; }
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public CoreWebView2NewWindowRequestedEventArgs? NewWindowArgs { get; set; }
 
     public SedgeBrowserOptions Options { get; }
@@ -26,6 +29,7 @@ public class BrowserForm : Form, IBrowserForm
     public BoxButton BoxMinMax { get; } = new(BoxButtons.Maximize);
     public BoxButton BoxIcon { get; } = new(BoxButtons.Icon);
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Title
     {
         get => Text;
@@ -45,6 +49,7 @@ public class BrowserForm : Form, IBrowserForm
 
     public ICollection<string> CustomUserAgentFilters { get; } = null!;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string? DefaultUserAgent { get; set; }
 
     public Color CurrentBorderColor => IsMainForm ? BorderAndStatus : BorderAndStatusChildren;

@@ -15,12 +15,14 @@ public class UrlNavigation : UserControl, IUrlNavigation
 
     private readonly IBrowserForm _browserForm;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string Url
     {
         get => _url.Text;
         set => _url.Text = value;
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool HideBtnOnClose { get; set; }
 
     public UrlNavigation(
